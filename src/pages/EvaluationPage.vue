@@ -2,6 +2,8 @@
 import { useRoute } from "vue-router";
 import type { Operacion, Restriccion } from "../types/operacion";
 import { ref } from "vue";
+import { Polinomio } from "../types/polinomio";
+import { Monomio } from "../types/monomio";
 const query = useRoute().query;
 const maxVariables = query.maxVariables as unknown as number;
 const maxRestricciones = query.maxRestricciones as unknown as number;
@@ -38,10 +40,86 @@ function resolver() {
 }
 
 function resolverDosFases() {
-    
+   
 }
+
 function resolverGranM() {
-    
+      const functionPenalizada = new Polinomio();
+    operacion.variables.forEach((variable, index) => {
+        functionPenalizada.agregarMonomio(
+            new Monomio(
+                variable, `x${index + 1}`,
+            )
+        );
+    });
+     const funcionesObjetivos: Map<string, Polinomio> = new Map();
+    operacion.restricciones.forEach((restriccion: Restriccion, index) => {
+       funcionesObjetivos.set(`f${index}`, new Polinomio());
+        restriccion.variables.forEach((variable, index2) => {
+            funcionesObjetivos.get(`f${index}`)?.agregarMonomio(
+                new Monomio(
+                   variable, `x${index2 + 1}`,
+                )
+            );
+        });
+        if (restriccion.operador == 'mni') {
+          funcionesObjetivos.get(`f${index}`)?.agregarMonomio(
+                new Monomio(
+                    1, 'S' + (index + 1)
+                )
+            );
+            functionPenalizada.agregarMonomio(
+                new Monomio(
+                    1, 'S' + (index + 1)
+                )
+            )
+        }
+        if (restriccion.operador == 'myi') {
+          funcionesObjetivos.get(`f${index}`)?.agregarMonomio(
+                new Monomio(
+                    -1, 'e' + (index + 1)
+                )
+            );
+            funcionesObjetivos.get(`f${index}`)?.agregarMonomio(
+                new Monomio(
+                    1, 'a' + (index + 1)
+                )
+            );
+            functionPenalizada.agregarMonomio(
+                new Monomio(
+                    0, 'e' + (index + 1)
+                )
+            );
+            functionPenalizada.agregarMonomio(
+                new Monomio(
+                    1, 'a' + (index + 1),
+                    true
+                )
+            )
+        }
+
+        if (restriccion.operador == 'i') {
+          funcionesObjetivos.get(`f${index}`)?.agregarMonomio(
+                new Monomio(
+                    1, 'a' + (index + 1)
+                )
+            );
+            functionPenalizada.agregarMonomio(
+                new Monomio(
+                    1, 'a' + (index + 1),
+                    true
+                )
+            )
+        }
+
+      
+    });
+
+      functionPenalizada.multiplicarPorNegativo();
+        functionPenalizada.moverMonomioAPrincipal();
+
+        console.log(`Funcion penalizada: ${functionPenalizada.toString()}`);
+        console.log(`Funcion objetivos: ${Array.from(funcionesObjetivos.values()).map(x => x.toString())}`);
 }
 </script>
 <template>
@@ -87,8 +165,8 @@ function resolverGranM() {
           class="mr-2 ml-2 h-8 w-full bg-transparent placeholder:text-slate-400 text-slate-700 border border-gray-500 rounded transition duration-300 ease cursor-pointer"
         >
           <option value="mni"><=</option>
-          <option value="myi">=</option>
-          <option value="i">>=</option>
+          <option value="myi">>=</option>
+          <option value="i">=</option>
         </select>
         <input class="text-center rounded w-10 h-8 border border-gray-500" v-model="restriccion.resultado" type="number" />
       </div>
