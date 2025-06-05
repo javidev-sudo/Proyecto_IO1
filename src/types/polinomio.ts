@@ -5,15 +5,29 @@ export class Polinomio {
     public monomios: Monomio[];
     public principalMonomios: Monomio[] = [];
     // [-w, +x1, 3X2, -2X3, 4X4] = []
-
-    constructor(variable: string = 'W') {
-        this.principalMonomios = [new Monomio(1, variable)];
+    
+    constructor(variable: string|undefined = 'W', coeficiente: number = 1) {
+        this.principalMonomios = [new Monomio(coeficiente, variable)];
         this.monomios = [];
     }
 
     public agregarMonomio(monomio: Monomio): void {
         let existe = false;
         this.monomios.map((m: Monomio) => {
+            if (m.getVariable() === monomio.getVariable()) {
+                m.coeficiente += monomio.coeficiente;
+                existe = true;
+                return;
+            }
+        });
+        if (!existe) {
+            this.monomios.push(monomio);
+        }
+    }
+
+    public agregarMonomioAPrincipal(monomio: Monomio): void {
+        let existe = false;
+        this.principalMonomios.map((m: Monomio) => {
             if (m.getVariable() === monomio.getVariable()) {
                 m.coeficiente += monomio.coeficiente;
                 existe = true;
@@ -48,6 +62,19 @@ export class Polinomio {
         polinomio.monomios.forEach(monomio => {
             this.agregarMonomio(monomio);
         });
+    }
+
+    public existeVariable(variable: string = 'a'): boolean {
+        const regex: RegExp = new RegExp(`^${variable}\\d+$`); // a2 a5 a10 //aa24 ab455
+        for (const monomio of this.monomios) {
+            if (monomio.getVariable() == undefined) {
+                continue;
+            }
+            if (regex.test(monomio.getVariable()!)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public toString(): string {
