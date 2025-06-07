@@ -2,8 +2,12 @@ import type { Operacion, Restriccion } from "./operacion";
 import { Polinomio } from "./polinomio";
 import { Monomio } from "./monomio";
 export class MetodoGranM {
-  protected funcionPenalizada: Polinomio = new Polinomio();
+  protected funcionPenalizada: Polinomio = new Polinomio('W');
   protected funcionesObjetivos: Map<string, Polinomio> = new Map();
+  // {
+  //   't1': [result] = [.,..,].
+  //   't2': [result] = [.,..,],
+  // }
   constructor(
     protected operacion: Operacion,
     protected objetivo: string = "max"
@@ -11,7 +15,7 @@ export class MetodoGranM {
     this.procesarDatosIniciales();
   }
 
-  procesarDatosIniciales() {
+  private procesarDatosIniciales() {
     this.operacion.variables.forEach((variable, index) => {
       this.funcionPenalizada.agregarMonomio(
         new Monomio(variable, `x${index + 1}`)
@@ -29,7 +33,7 @@ export class MetodoGranM {
           .get(`f${index}`)
           ?.agregarMonomio(new Monomio(1, "S" + (index + 1)));
         this.funcionPenalizada.agregarMonomio(
-          new Monomio(1, "S" + (index + 1))
+          new Monomio(0, "S" + (index + 1))
         );
       }
       if (restriccion.operador == "myi") {
@@ -56,17 +60,20 @@ export class MetodoGranM {
         );
       }
     });
-    this.funcionPenalizada.multiplicarPorNegativo();
+    if (this.objetivo != "max") {
+      this.funcionPenalizada.multiplicarPorNegativo();
+    }
     this.funcionPenalizada.moverMonomioAPrincipal();
   }
 
   generarResultadoDeMatrizRegionZ(): Polinomio[] {
     const matrizZ: Polinomio[][] = [];
-    const primeraFila: Polinomio[] = []
-    for(const monomio of this.funcionPenalizada.principalMonomios) {
-        const polinomio = new Polinomio();
-        polinomio.agregarMonomio(new Monomio(monomio.getCoeficiente(), monomio.getIsM() ? 'M' : undefined));
-        primeraFila.push(polinomio);
+    const primeraFila: Polinomio[] = [];
+    const variablesDisponibles: string[] = this.funcionPenalizada.obtenerVariablesDisponibles();
+    for (const monomio of this.funcionPenalizada.principalMonomios) {
+      const polinomio = new Polinomio();
+      polinomio.agregarMonomio(new Monomio(monomio.getCoeficiente(), monomio.getIsM() ? 'M' : undefined));
+      primeraFila.push(polinomio);
     }
     const polinomio = new Polinomio();
     polinomio.agregarMonomio(new Monomio(0));
@@ -74,23 +81,64 @@ export class MetodoGranM {
     matrizZ.push(primeraFila);
 
     this.funcionesObjetivos.forEach(function (polinomio: Polinomio) {
-        const numeroM = polinomio.existeVariable('a') ? -1 : 1;
-        const filaPolinomio: Polinomio[] = [];
-        for (const monomio of polinomio.monomios) {
-            const polinomioAux = new Polinomio();
-            polinomioAux.agregarMonomio(new Monomio(monomio.getCoeficiente() * numeroM, 'M'));
-            filaPolinomio.push(polinomioAux);
-        }
+      const mapaVariables: Map<string, Polinomio> = new Map();
+      const numeroM = polinomio.existeVariable('a') ? -1 : 1;
+      variablesDisponibles.forEach((variable: string) => {
         const polinomioAux = new Polinomio();
-        polinomioAux.agregarMonomio(new Monomio(polinomioAux.principalMonomios[0].getCoeficiente() * numeroM, 'M'));
-        filaPolinomio.push(polinomioAux);
-        matrizZ.push(filaPolinomio);
+        polinomioAux.agregarMonomio(new Monomio(0, numeroM == -1 ? 'M' : undefined));
+        mapaVariables.set(variable, polinomioAux);
+      });
+      for (const monomio of polinomio.monomios) {
+        const polinomioAux = new Polinomio();
+        polinomioAux.agregarMonomio(new Monomio(monomio.getCoeficiente() * numeroM, numeroM == -1 ? 'M' : undefined));
+        mapaVariables.set(monomio.getVariable()!, polinomioAux);
+      }
+      const polinomioAux = new Polinomio();
+      polinomioAux.agregarMonomio(new Monomio(polinomio.principalMonomios[0].getCoeficiente() * numeroM, numeroM == -1 ? 'M' : undefined));
+      mapaVariables.set('', polinomioAux);
+      matrizZ.push(Array.from(mapaVariables.values()));
     });
+    // matrizZ
+    // [
+    //   [Polinomio, Polinomio, Polinomio, ...],
+    //   [Polinomio, Polinomio, Polinomio, ...],
+    //   [Polinomio, Polinomio, Polinomio, ...],
+    // ]
 
+    const resultado: Map<string, Polinomio> = new Map();
 
-    return [];
+    for (let i = 1; i < matrizZ.length; i++) {
+      const firstPolinomio: Polinomio | undefined = matrizZ[i][0] ?? undefined;
+      if (firstPolinomio && !firstPolinomio.existeVariable('M')) {
+        continue;
+      }
+      for (let j = 0; j < matrizZ[i].length; j++) {
+        if (!resultado.has(`id-${j}`)) {
+          resultado.set(`id-${j}`, matrizZ[i][j]);
+        } else {
+          const actualPolinomio: Polinomio | undefined = resultado.get(`id-${j}`);
+          if (actualPolinomio) {
+            actualPolinomio.sumarPolinomio(matrizZ[i][j]);
+            resultado.set(`id-${j}`, actualPolinomio);
+          }
+        }
+      }
+    }
+
+    if (matrizZ.length > 0) {
+      const primeraFila: Polinomio[] = matrizZ[0];
+      for (let i = 0; i < primeraFila.length - 1; i++) {
+        const actualPolinomio: Polinomio | undefined = resultado.get(`id-${i}`);
+        if (actualPolinomio) {
+          actualPolinomio.sumarPolinomio(primeraFila[i]);
+          resultado.set(`id-${i}`, actualPolinomio);
+        }
+      }
+    }
+    return Array.from(resultado.values());
   }
+
   resolver(): void {
-    
+    const resultadoMatrizZ = this.generarResultadoDeMatrizRegionZ();
   }
 }

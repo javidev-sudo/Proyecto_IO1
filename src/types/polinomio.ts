@@ -5,8 +5,8 @@ export class Polinomio {
     public monomios: Monomio[];
     public principalMonomios: Monomio[] = [];
     // [-w, +x1, 3X2, -2X3, 4X4] = []
-    
-    constructor(variable: string|undefined = 'W', coeficiente: number = 1) {
+
+    constructor(variable: string | undefined = undefined, coeficiente: number = 1) {
         this.principalMonomios = [new Monomio(coeficiente, variable)];
         this.monomios = [];
     }
@@ -55,7 +55,7 @@ export class Polinomio {
         });
 
         this.monomios = [];
-        
+
     }
 
     public sumarPolinomio(polinomio: Polinomio): void {
@@ -70,11 +70,22 @@ export class Polinomio {
             if (monomio.getVariable() == undefined) {
                 continue;
             }
-            if (regex.test(monomio.getVariable()!)) {
+            if (monomio.getVariable() == variable || regex.test(monomio.getVariable()!)) {
                 return true;
             }
         }
         return false;
+    }
+
+    obtenerVariablesDisponibles(): string[] {
+        const variablesDisponibles: string[] = [];
+        for (const monomio of this.principalMonomios) {
+            variablesDisponibles.push(monomio.getVariable() || '');
+        }
+        for (const monomio of this.monomios) {
+            variablesDisponibles.push(monomio.getVariable() || '');
+        }
+        return variablesDisponibles;
     }
 
     public toString(): string {
