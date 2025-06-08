@@ -3,7 +3,6 @@ import { useRoute } from "vue-router";
 import type { Operacion, Restriccion } from "../types/operacion";
 import { MetodoGranM } from "../types/metodoGranM";
 import { ref } from "vue";
-import type { Polinomio } from "../types/polinomio";
 const query = useRoute().query;
 const maxVariables = query.maxVariables as unknown as number;
 const maxRestricciones = query.maxRestricciones as unknown as number;
@@ -68,11 +67,6 @@ function resolverGranM() {
   //     console.log(data);
   //   const metodoGranM = new MetodoGranM(data, objetivo.value);
     const metodoGranM = new MetodoGranM(operacion, objetivo.value);
-    const resultados: Polinomio[] = metodoGranM.generarResultadoDeMatrizRegionZ();
-    console.log(resultados);
-    for (const resultado of resultados) {
-      console.log(resultado.toString());
-    }
     metodoGranM.resolver();
 }
 </script>

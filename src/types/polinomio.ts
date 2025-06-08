@@ -6,7 +6,7 @@ export class Polinomio {
     public principalMonomios: Monomio[] = [];
     // [-w, +x1, 3X2, -2X3, 4X4] = []
 
-    constructor(variable: string | undefined = undefined, coeficiente: number = 1) {
+    constructor(variable: string | undefined = undefined, coeficiente: number = 0) {
         this.principalMonomios = [new Monomio(coeficiente, variable)];
         this.monomios = [];
     }
@@ -53,14 +53,22 @@ export class Polinomio {
             monomio.coeficiente *= -1;
             this.principalMonomios.push(monomio);
         });
-
-        this.monomios = [];
+        this.monomios = [new Monomio(0)];
 
     }
 
     public sumarPolinomio(polinomio: Polinomio): void {
         polinomio.monomios.forEach(monomio => {
             this.agregarMonomio(monomio);
+        });
+    }
+
+    public multiplicar(numero: number): void {
+        this.principalMonomios.map(monomio => {
+            monomio.coeficiente *= numero;
+        });
+        this.monomios.map(monomio => {
+            monomio.coeficiente *= numero;
         });
     }
 
@@ -80,10 +88,10 @@ export class Polinomio {
     obtenerVariablesDisponibles(): string[] {
         const variablesDisponibles: string[] = [];
         for (const monomio of this.principalMonomios) {
-            variablesDisponibles.push(monomio.getVariable() || '');
+            variablesDisponibles.push(monomio.getVariable() ?? '');
         }
         for (const monomio of this.monomios) {
-            variablesDisponibles.push(monomio.getVariable() || '');
+            variablesDisponibles.push(monomio.getVariable() ?? '');
         }
         return variablesDisponibles;
     }

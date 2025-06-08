@@ -2,7 +2,7 @@ import type { Operacion, Restriccion } from "./operacion";
 import { Polinomio } from "./polinomio";
 import { Monomio } from "./monomio";
 export class MetodoGranM {
-  protected funcionPenalizada: Polinomio = new Polinomio('W');
+  protected funcionPenalizada: Polinomio = new Polinomio('W', 1);
   protected funcionesObjetivos: Map<string, Polinomio> = new Map();
   // {
   //   't1': [result] = [.,..,].
@@ -139,6 +139,32 @@ export class MetodoGranM {
   }
 
   resolver(): void {
-    const resultadoMatrizZ = this.generarResultadoDeMatrizRegionZ();
+    const iteraciones = []
+    const resultadoMatrizZ: Polinomio[] = this.generarResultadoDeMatrizRegionZ();
+    const variablesDisponibles: string[] = this.funcionPenalizada.obtenerVariablesDisponibles();
+
+    const matrizInicial: number[][] = [];
+    
+    this.funcionesObjetivos.forEach(function (polinomio: Polinomio) {
+      const mapaVariables: Map<string, number> = new Map();
+      variablesDisponibles.forEach((variable: string) => {
+        mapaVariables.set(variable, 0);
+      });
+      for (const monomio of polinomio.monomios) {
+        mapaVariables.set(monomio.getVariable()!, monomio.getCoeficiente());
+      }
+      mapaVariables.set(polinomio.principalMonomios[0].getVariable()!, polinomio.principalMonomios[0].getCoeficiente());
+      matrizInicial.push(Array.from(mapaVariables.values()));
+    })
+    iteraciones.push({
+      'operacion': resultadoMatrizZ,
+      'matriz': matrizInicial,
+      'fila': 0,
+      'columna': 0
+    })
+    console.log(variablesDisponibles)
+    console.log(matrizInicial);
+    
+
   }
 }
