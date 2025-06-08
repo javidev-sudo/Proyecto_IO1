@@ -15,6 +15,17 @@ export class Monomio {
         return this.isM;
     }
 
+    evaluar(x: number): number {
+        if(this.variable != undefined)
+        {
+            return this.coeficiente * x;
+        }
+        else
+        {
+            return this.coeficiente;
+        }
+    }
+
     toString(): string {
         if (this.variable === undefined) {
             return this.coeficiente.toString();

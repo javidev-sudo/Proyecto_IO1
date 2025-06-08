@@ -96,6 +96,15 @@ export class Polinomio {
         return variablesDisponibles;
     }
 
+    evaluar(x: number): number {
+        let resultado = 0;
+        for(const monomio of this.monomios)
+        {
+            resultado += monomio.evaluar(x);
+        }
+        return resultado;
+    }
+
     public toString(): string {
         let resultado = '';
         this.principalMonomios.forEach((monomio, index) => {

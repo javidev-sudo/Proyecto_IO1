@@ -66,6 +66,7 @@ export class MetodoGranM {
     this.funcionPenalizada.moverMonomioAPrincipal();
   }
 
+
   generarResultadoDeMatrizRegionZ(): Polinomio[] {
     const matrizZ: Polinomio[][] = [];
     const primeraFila: Polinomio[] = [];
@@ -138,6 +139,43 @@ export class MetodoGranM {
     return Array.from(resultado.values());
   }
 
+
+
+  masNegativo(polinomios: Polinomio[]): number | undefined{
+
+    let menor = polinomios[1].evaluar(100);
+    let pos = 1;
+    for (let i = 2; i < polinomios.length-1; i++)
+   {
+      const actual = polinomios[i].evaluar(100);
+       if(menor > actual)
+       {
+          pos = i;
+          menor = actual;
+       }
+    }
+      return (menor < 0) ? pos : undefined;   
+  }
+
+  masPositivo(matriz: number[][],columna: number): number{
+    const resta: number[] = [];
+    
+    for (let i = 1; i < matriz.length; i++)
+    {
+      resta.push(matriz[i][matriz.length - 1]/matriz[i][columna]);
+    }   
+    const menor = resta[0];
+    for (let i = 1; i < resta.length; i++)
+    {
+      if(resta[i] > 0)
+      {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+
   resolver(): void {
     const iteraciones = []
     const resultadoMatrizZ: Polinomio[] = this.generarResultadoDeMatrizRegionZ();
@@ -156,6 +194,24 @@ export class MetodoGranM {
       mapaVariables.set(polinomio.principalMonomios[0].getVariable()!, polinomio.principalMonomios[0].getCoeficiente());
       matrizInicial.push(Array.from(mapaVariables.values()));
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     iteraciones.push({
       'operacion': resultadoMatrizZ,
       'matriz': matrizInicial,
