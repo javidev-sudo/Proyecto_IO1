@@ -72,7 +72,7 @@ function resolverGranM() {
 </script>
 <template>
   <div
-    class="p-10 bg-gradient-to-tl from-gray-500 to-gray-200 h-1/2 flex flex-col items-start w-full"
+    class="overflow-y-scroll p-10 bg-gradient-to-tl from-gray-400 to-gray-200 flex flex-col items-start w-screen h-full rounded"
   >
     <h2>Funcion Objetivo</h2>
     <div class="flex flex-row">
