@@ -143,39 +143,84 @@ export class MetodoGranM {
 
   masNegativo(polinomios: Polinomio[]): number | undefined{
 
-    let menor = polinomios[1].evaluar(100);
+    let menor = polinomios[1].evaluar(1000);
     let pos = 1;
     for (let i = 2; i < polinomios.length-1; i++)
    {
-      const actual = polinomios[i].evaluar(100);
+      const actual = polinomios[i].evaluar(1000);
        if(menor > actual)
        {
           pos = i;
           menor = actual;
        }
     }
-      return (menor < 0) ? pos : undefined;   
+      return (menor < 0) ? pos : undefined; // le pongo esto por si ya no hay polinomios negativos  
   }
 
-  masPositivo(matriz: number[][],columna: number): number{
-    const resta: number[] = [];
+  encuentraPivote(matriz: number[][],columna: number): number{
     
-    for (let i = 1; i < matriz.length; i++)
+    const division = new Map<number, number>();
+    
+    for (let i = 0; i < matriz.length; i++) // este for la division para encontra el mas positivo y la posicion del pivote
     {
-      resta.push(matriz[i][matriz.length - 1]/matriz[i][columna]);
-    }   
-    const menor = resta[0];
-    for (let i = 1; i < resta.length; i++)
-    {
-      if(resta[i] > 0)
+      const numerador = matriz[i][matriz[i].length-1];
+      const denominador = matriz[i][columna];
+      if(denominador !== 0)
       {
-        return i;
+        division.set(i, numerador / denominador);
+      }      
+    }   
+
+    const filtroPositivos = new Map(Array.from(division).filter(x => x[1] > 0)); // filtara los numeros positivos usando un artificio de array
+    const llavePrimera = filtroPositivos.keys().next().value!;
+
+    let menor = filtroPositivos.get(llavePrimera);
+    let posicion = llavePrimera;
+
+    
+
+    for (const[pos, valor] of filtroPositivos) // solo usamos los valores positivos
+    {
+      const actual = valor;
+      if(menor! > actual)
+      {
+        menor = actual;
+        posicion = pos;
       }
     }
-    return 0;
+    return posicion;
   }
 
+  existeNegativo(polinomios: Polinomio[]): boolean{
+    const pos = this.masNegativo(polinomios);
+    return pos !== undefined;
+  }
 
+  dividirConElementoPivote(matrizInicial: number[][], pivote: number, columna: number): void
+  {
+    const elementoPivote = matrizInicial[pivote][columna];
+    for(let i = 0; i < matrizInicial[pivote].length; i++)
+    {
+      const elemento = matrizInicial[pivote][i];
+      matrizInicial[pivote][i] = elemento / elementoPivote;
+    }
+  }
+
+  filasAOperar(matriz: number[][], columna: number) : number[]
+  {
+    const filas: number[] = [];
+    
+    for (let i = 0; i < matriz.length; i++) // este for la division para encontra el mas positivo y la posicion del pivote
+    {
+      const denominador = matriz[i][columna];
+      if(denominador !== 0)
+      {
+        filas.push(i);
+      }      
+    }
+
+    return filas;
+  }
   resolver(): void {
     const iteraciones = []
     const resultadoMatrizZ: Polinomio[] = this.generarResultadoDeMatrizRegionZ();
@@ -196,6 +241,18 @@ export class MetodoGranM {
     })
 
 
+    while (this.existeNegativo(resultadoMatrizZ))
+    {
+      
+      const columnaPivote = this.masNegativo(resultadoMatrizZ); // encuentra la columna del elemento mas negativo
+      const pivote = this.encuentraPivote(matrizInicial, columnaPivote!); // encuentra el pivote osea la fila
+      this.dividirConElementoPivote(matrizInicial, pivote, columnaPivote!); // aqui dividimos el pivote con todos los demas elementos
+      const filas = this.filasAOperar(matrizInicial, columnaPivote!); // aqui obtenemos las filas que son diferentes de cero para poder operarlas
+      for (const fila of filas) {
+        
+      } 
+    }
+    
 
 
 
