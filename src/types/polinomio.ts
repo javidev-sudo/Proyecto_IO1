@@ -105,6 +105,7 @@ export class Polinomio {
         return resultado;
     }
 
+
     public toString(): string {
         let resultado = '';
         this.principalMonomios.forEach((monomio, index) => {

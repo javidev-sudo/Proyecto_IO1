@@ -65,10 +65,23 @@ function resolverGranM() {
 
      ]
     }
-     console.log(data);
+     
+     const matriz: number[][] = [
+
+      [0,1,1,1,0,0,0,0,12],
+      [0,1,0,0,-1,1,0,0,4],
+      [0,0,1,0,0,0,-1,1,3]
+]
+     //console.log(data);
      const metodoGranM = new MetodoGranM(data, objetivo.value);
      const resultados = metodoGranM.generarResultadoDeMatrizRegionZ();
-     console.log(metodoGranM.masNegativo(resultados)); 
+     let polinomio: Polinomio = new Polinomio();
+     polinomio = resultados[2];
+     console.log(resultados);
+     polinomio.multiplicarPorNegativo(); 
+     console.log(polinomio);
+     console.log(resultados);
+     
      
      
     //const metodoGranM = new MetodoGranM(operacion, objetivo.value);

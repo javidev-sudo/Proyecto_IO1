@@ -209,6 +209,7 @@ export class MetodoGranM {
   filasAOperar(matriz: number[][], columna: number) : number[]
   {
     const filas: number[] = [];
+    const pivote = this.encuentraPivote(matriz, columna);
     
     for (let i = 0; i < matriz.length; i++) // este for la division para encontra el mas positivo y la posicion del pivote
     {
@@ -218,8 +219,31 @@ export class MetodoGranM {
         filas.push(i);
       }      
     }
+    return filas.filter(x => x !== pivote);
+  }
 
-    return filas;
+  operacionesfilasConPivote(matriz: number[][], pivote: number, columnaPivote: number, filaACambiar: number): void
+  {
+    const elemento = (matriz[filaACambiar][columnaPivote])*-1;
+    for(let i = 0; i < matriz[filaACambiar].length; i++)
+    {
+      const elementoFilaRe = matriz[filaACambiar][i];
+      const reglonPivote = matriz[pivote][i];
+      matriz[filaACambiar][i] = (elemento*reglonPivote) + elementoFilaRe;
+    }
+  }
+
+  operacionFilaPolinomio(polinomios: Polinomio[], matriz: number[][], pivote: number, columnaPivote: number): void
+  {
+    const elemento: Polinomio = polinomios[columnaPivote];
+    elemento.multiplicar(-1);
+    for(let i = 0; i < polinomios.length; i++)
+    {
+      elemento.multiplicar(matriz[pivote][i]);
+      elemento.sumarPolinomio(polinomios[i]);
+      polinomios[i] = elemento;
+      
+    }
   }
   resolver(): void {
     const iteraciones = []
@@ -248,9 +272,20 @@ export class MetodoGranM {
       const pivote = this.encuentraPivote(matrizInicial, columnaPivote!); // encuentra el pivote osea la fila
       this.dividirConElementoPivote(matrizInicial, pivote, columnaPivote!); // aqui dividimos el pivote con todos los demas elementos
       const filas = this.filasAOperar(matrizInicial, columnaPivote!); // aqui obtenemos las filas que son diferentes de cero para poder operarlas
-      for (const fila of filas) {
-        
+
+      for (const fila of filas) // hace las operaciones con las filas para cambiarlas
+      {
+        this.operacionesfilasConPivote(matrizInicial, pivote, columnaPivote!, fila); // aqui se hacen las operaciones con this.operacionesfilasConPivote
       } 
+
+
+      iteraciones.push({
+      'operacion': resultadoMatrizZ,
+      'polinomios': resultadoMatrizZ,
+      'matriz': matrizInicial,
+      'fila': pivote,
+      'columna': columnaPivote
+    })
     }
     
 
@@ -269,12 +304,7 @@ export class MetodoGranM {
 
 
 
-    iteraciones.push({
-      'operacion': resultadoMatrizZ,
-      'matriz': matrizInicial,
-      'fila': 0,
-      'columna': 0
-    })
+    
     console.log(variablesDisponibles)
     console.log(matrizInicial);
     
