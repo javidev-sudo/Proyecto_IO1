@@ -44,48 +44,9 @@ function resolverDosFases() {
 }
 
 function resolverGranM() {
-    const data: Operacion = {
-     variables: [5, 7],
-     restricciones: [
-       {
-         variables: [1, 1],
-         operador: "mni",
-         resultado: 12,
-       },
-       {
-         variables: [1, 0],
-         operador: "myi",
-         resultado: 4,
-       },
-       {
-         variables: [0, 1],
-         operador: "myi",
-         resultado: 3,
-       }
-
-     ]
-    }
      
-     const matriz: number[][] = [
-
-      [0,1,1,1,0,0,0,0,12],
-      [0,1,0,0,-1,1,0,0,4],
-      [0,0,1,0,0,0,-1,1,3]
-]
-     //console.log(data);
-     const metodoGranM = new MetodoGranM(data, objetivo.value);
-     const resultados = metodoGranM.generarResultadoDeMatrizRegionZ();
-     let polinomio: Polinomio = new Polinomio();
-     polinomio = resultados[2];
-     console.log(resultados);
-     polinomio.multiplicarPorNegativo(); 
-     console.log(polinomio);
-     console.log(resultados);
-     
-     
-     
-    //const metodoGranM = new MetodoGranM(operacion, objetivo.value);
-   // metodoGranM.resolver();
+   const metodoGranM = new MetodoGranM(operacion, objetivo.value);
+   metodoGranM.resolver();
 }
 </script>
 <template>

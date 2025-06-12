@@ -1,6 +1,7 @@
 import type { Operacion, Restriccion } from "./operacion";
 import { Polinomio } from "./polinomio";
 import { Monomio } from "./monomio";
+import { h } from "vue";
 export class MetodoGranM {
   protected funcionPenalizada: Polinomio = new Polinomio('W', 1);
   protected funcionesObjetivos: Map<string, Polinomio> = new Map();
@@ -76,6 +77,7 @@ export class MetodoGranM {
       polinomio.agregarMonomio(new Monomio(monomio.getCoeficiente(), monomio.getIsM() ? 'M' : undefined));
       primeraFila.push(polinomio);
     }
+    
     const polinomio = new Polinomio();
     polinomio.agregarMonomio(new Monomio(0));
     primeraFila.push(polinomio);
@@ -233,81 +235,62 @@ export class MetodoGranM {
     }
   }
 
-  operacionFilaPolinomio(polinomios: Polinomio[], matriz: number[][], pivote: number, columnaPivote: number): void
+  operacionFilaPolinomios(polinomios: Polinomio[], matriz: number[][], pivote: number, columnaPivote: number): void
   {
-    const elemento: Polinomio = polinomios[columnaPivote];
-    elemento.multiplicar(-1);
+    const elemento: Polinomio = polinomios[columnaPivote].clonar(); // evita la mutabilidad del objeto
+    elemento.multiplicar(-1); // se mantiene el valor
     for(let i = 0; i < polinomios.length; i++)
     {
-      elemento.multiplicar(matriz[pivote][i]);
-      elemento.sumarPolinomio(polinomios[i]);
-      polinomios[i] = elemento;
+      let resultado: Polinomio = elemento.clonar();
+      resultado.multiplicar(matriz[pivote][i]); 
+      resultado.sumarPolinomio(polinomios[i]);     
+      polinomios[i] = resultado;
       
     }
   }
   resolver(): void {
-    const iteraciones = []
     const resultadoMatrizZ: Polinomio[] = this.generarResultadoDeMatrizRegionZ();
-    const variablesDisponibles: string[] = this.funcionPenalizada.obtenerVariablesDisponibles();
+    let variablesDisponibles: string[] = this.funcionPenalizada.obtenerVariablesDisponibles();
+    variablesDisponibles.pop();
 
     const matrizInicial: number[][] = [];
     
     this.funcionesObjetivos.forEach(function (polinomio: Polinomio) {
       const mapaVariables: Map<string, number> = new Map();
+
       variablesDisponibles.forEach((variable: string) => {
         mapaVariables.set(variable, 0);
       });
+      
       for (const monomio of polinomio.monomios) {
         mapaVariables.set(monomio.getVariable()!, monomio.getCoeficiente());
       }
+      
       mapaVariables.set(polinomio.principalMonomios[0].getVariable()!, polinomio.principalMonomios[0].getCoeficiente());
       matrizInicial.push(Array.from(mapaVariables.values()));
     })
 
+    
+    
 
-    while (this.existeNegativo(resultadoMatrizZ))
+    /*ile (this.existeNegativo(resultadoMatrizZ))
     {
       
       const columnaPivote = this.masNegativo(resultadoMatrizZ); // encuentra la columna del elemento mas negativo
       const pivote = this.encuentraPivote(matrizInicial, columnaPivote!); // encuentra el pivote osea la fila
       this.dividirConElementoPivote(matrizInicial, pivote, columnaPivote!); // aqui dividimos el pivote con todos los demas elementos
       const filas = this.filasAOperar(matrizInicial, columnaPivote!); // aqui obtenemos las filas que son diferentes de cero para poder operarlas
-
+      
       for (const fila of filas) // hace las operaciones con las filas para cambiarlas
       {
+        
         this.operacionesfilasConPivote(matrizInicial, pivote, columnaPivote!, fila); // aqui se hacen las operaciones con this.operacionesfilasConPivote
       } 
 
+      this.operacionFilaPolinomios(resultadoMatrizZ, matrizInicial, pivote, columnaPivote!);
 
-      iteraciones.push({
-      'operacion': resultadoMatrizZ,
-      'polinomios': resultadoMatrizZ,
-      'matriz': matrizInicial,
-      'fila': pivote,
-      'columna': columnaPivote
-    })
-    }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    console.log(variablesDisponibles)
-    console.log(matrizInicial);
-    
-
+    }*/
+    //console.log(matrizInicial);
+    //console.log(resultadoMatrizZ);
   }
 }

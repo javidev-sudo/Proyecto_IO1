@@ -64,11 +64,11 @@ export class Polinomio {
     }
 
     public multiplicar(numero: number): void {
-        this.principalMonomios.map(monomio => {
-            monomio.coeficiente *= numero;
+        this.principalMonomios.map(monomio => {           
+            monomio.coeficiente *= numero;                               
         });
-        this.monomios.map(monomio => {
-            monomio.coeficiente *= numero;
+        this.monomios.map(monomio => {           
+            monomio.coeficiente *= numero;          
         });
     }
 
@@ -104,6 +104,14 @@ export class Polinomio {
         }
         return resultado;
     }
+
+    clonar(): Polinomio {
+    const copia = new Polinomio(); // Llama al constructor por defecto
+    // Clonamos los monomios
+    copia.principalMonomios = this.principalMonomios.map(m => m.clonar());
+    copia.monomios = this.monomios.map(m => m.clonar());
+    return copia;
+  }
 
 
     public toString(): string {

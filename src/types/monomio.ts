@@ -26,6 +26,10 @@ export class Monomio {
         }
     }
 
+    public clonar(): Monomio {
+    return new Monomio(this.coeficiente, this.variable, this.isM);
+    }
+
     toString(): string {
         if (this.variable === undefined) {
             return this.coeficiente.toString();
