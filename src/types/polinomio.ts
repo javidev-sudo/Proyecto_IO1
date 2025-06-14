@@ -113,18 +113,23 @@ export class Polinomio {
     return copia;
   }
 
+  obtenerUltimoMonomio(): Monomio
+  {
+     return this.monomios[this.monomios.length - 1];
+  }
+    
+    
+  
+
 
     public toString(): string {
+        // TODO mejorar este metodo
         let resultado = '';
-        this.principalMonomios.forEach((monomio, index) => {
-            if (index > 0 && monomio.coeficiente >= 0) {
-                resultado += '+';
-            }
-            resultado += monomio.toString();
-        });
-        resultado += ' = ';
         this.monomios.forEach((monomio, index) => {
-            if (index > 0 && monomio.coeficiente >= 0) {
+            if (monomio.coeficiente == 0 && monomio.getVariable()) {
+                return;
+            }
+            if (index > 0 && monomio.coeficiente > 0) {
                 resultado += '+';
             }
             resultado += monomio.toString();

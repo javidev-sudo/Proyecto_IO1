@@ -2,8 +2,8 @@
 import { useRoute } from "vue-router";
 import type { Operacion, Restriccion } from "../types/operacion";
 import { MetodoGranM } from "../types/metodoGranM";
+import type { TablasIteracion } from "../types/tablasIteracion";
 import { ref } from "vue";
-import { Polinomio } from "../types/polinomio";
 const query = useRoute().query;
 const maxVariables = query.maxVariables as unknown as number;
 const maxRestricciones = query.maxRestricciones as unknown as number;
@@ -13,7 +13,14 @@ const operacion: Operacion = {
   variables: Array.from(Array(+maxVariables).keys()).map((x) => x * 0),
   restricciones: generarRestricciones(),
 };
-const objetivo = ref('max');
+const objetivo = ref("max");
+const tablasDeIteraciones = ref<TablasIteracion>(
+  {
+    iteraciones: [],
+    variablesColumna: [],
+    variablesFila: [],
+  }
+);
 
 function generarRestricciones(): Restriccion[] {
   const restricciones: Restriccion[] = [];
@@ -28,25 +35,23 @@ function generarRestricciones(): Restriccion[] {
 }
 
 function resolver() {
- 
-    if (metodo == 'df') {
-        resolverDosFases()
-        return
-    }
-    if (metodo == 'gm') {
-        resolverGranM()
-        return
-    }
+  if (metodo == "df") {
+    resolverDosFases();
+    return;
+  }
+  if (metodo == "gm") {
+    resolverGranM();
+    return;
+  }
 }
 
-function resolverDosFases() {
-   
-}
+function resolverDosFases() {}
 
 function resolverGranM() {
-     
-   const metodoGranM = new MetodoGranM(operacion, objetivo.value);
-   metodoGranM.resolver();
+  const metodoGranM = new MetodoGranM(operacion, objetivo.value);
+  metodoGranM.resolver();
+  tablasDeIteraciones.value = metodoGranM.obtenerTabladeIteraciones();
+  console.log(tablasDeIteraciones.value);
 }
 </script>
 <template>
@@ -55,7 +60,7 @@ function resolverGranM() {
   >
     <h2>Funcion Objetivo</h2>
     <div class="flex flex-row">
-      <div class="flex flex-row p-2" v-for="(x, index) in operacion.variables">
+      <div class="flex flex-row p-2" v-for="(x, index) in operacion.variables" v-bind:key="x">
         <h2 class="pr-1 text-xl" v-if="index != 0">+</h2>
         <input
           v-model="operacion.variables[index]"
@@ -67,25 +72,16 @@ function resolverGranM() {
     </div>
 
     <h2>Restricciones</h2>
-    <div class="flex flex-col" v-for="restriccion in operacion.restricciones">
+    <div class="flex flex-col" v-for="restriccion in operacion.restricciones" v-bind:key="restriccion.operador">
       <div class="flex flex-row p-2">
-        <div class="flex flex-row" v-for="(y, index2) in restriccion.variables">
-          <h2
-            class="pr-1 text-xl"
-            v-if="index2 != 0"
-          >
-            +
-          </h2>
+        <div class="flex flex-row" v-for="(y, index2) in restriccion.variables" v-bind:key="index2">
+          <h2 class="pr-1 text-xl" v-if="index2 != 0">+</h2>
           <input
             v-model="restriccion.variables[index2]"
             type="number"
             class="text-center rounded w-10 h-8 border border-gray-500"
           />
-          <h2
-            class="pl-1 text-xl"
-          >
-            x{{ index2 + 1 }}
-          </h2>
+          <h2 class="pl-1 text-xl">x{{ index2 + 1 }}</h2>
         </div>
         <select
           v-model="restriccion.operador"
@@ -95,7 +91,11 @@ function resolverGranM() {
           <option value="myi">>=</option>
           <option value="i">=</option>
         </select>
-        <input class="text-center rounded w-10 h-8 border border-gray-500" v-model="restriccion.resultado" type="number" />
+        <input
+          class="text-center rounded w-10 h-8 border border-gray-500"
+          v-model="restriccion.resultado"
+          type="number"
+        />
       </div>
     </div>
     <h2>Objetivo</h2>
@@ -121,4 +121,74 @@ function resolverGranM() {
     </div>
   </div>
 
+  <section class="bg-white py-20 lg:py-[120px] dark:bg-dark" v-if="tablasDeIteraciones.iteraciones.length > 0">
+    <div class="container mx-auto">
+      <div class="-mx-4 flex flex-wrap">
+        <div class="w-full px-4">
+          <div class="flex flex-row max-w-full overflow-x-auto mb-10" v-for="iteracion in tablasDeIteraciones.iteraciones" v-bind:key="iteracion.numeroIteracion">
+            <div class="w-1/12 flex flex-col items-center justify-center">
+              <div class="p-7"></div>
+              <div class="p-7" v-for="variableEntrada in tablasDeIteraciones.variablesFila">{{ variableEntrada }}</div>
+            </div>
+            <table class="w-1/12 table-auto">
+              <thead>
+                <tr class="bg-primary text-center">
+                  <th
+                    class="w-1/6 min-w-[160px] border-l border-transparent px-3 py-4 text-lg font-medium lg:px-4 lg:py-7"
+                  >
+                    Iteracion {{ iteracion.numeroIteracion }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr></tr>
+                 <tr>
+                  <td
+                    class="text-white bg-blue-400 px-2 py-5 text-center"
+                  >
+                  </td>
+                </tr>
+                <tr v-for="variableEntrada in iteracion.variablesEntrada">
+                  
+                  <td
+                    class="text-white bg-blue-400 px-2 py-5 text-center font-medium"
+                  >
+                    {{ variableEntrada }}
+                  </td>
+                </tr>
+    
+              </tbody>
+            </table>
+
+            <table class="w-3/4 table-fixed">
+              <thead>
+                <tr class="bg-primary text-center">
+                  <th
+                    v-for="variableColumna in tablasDeIteraciones.variablesColumna"
+                    class="w-1/6 min-w-[160px] border-l border-transparent px-3 py-4 text-lg font-medium text-white lg:px-4 lg:py-7 bg-blue-400"
+                  >
+                    {{variableColumna}}
+                  </th>
+                  
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(filas, index) in iteracion.matriz">
+                  <td
+                    v-for="(columna, index2) in filas"
+                    class="border-b border-l border-[#E8E8E8] px-2 py-5 text-center text-base font-medium" v-bind:class="{'bg-yellow-400': (index2 == iteracion.columnaPivote && index == iteracion.filaPivote && iteracion.filaPivote != 0)}"
+                  >
+                    {{ typeof columna == 'number' ? parseFloat(columna.toFixed(5)) : columna }}
+                  </td>
+                  
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div>
+  </section>
 </template>
