@@ -286,6 +286,7 @@ export class MetodoGranM {
       {
         break;
       }
+      
       const iteracion: Iteracion = {
         numeroIteracion: numeroIteraciones,
         columnaPivote: columnaPivote!,
@@ -294,6 +295,8 @@ export class MetodoGranM {
         variablesEntrada: [...variablesEncontradas]
       }
       this.tablasIteracion.iteraciones.push(iteracion);
+
+
       this.dividirConElementoPivote(matrizInicial, pivote, columnaPivote!); // aqui dividimos el pivote con todos los demas elementos
       const entrada = variablesDisponibles[columnaPivote!];
       variablesEncontradas[pivote] = entrada;

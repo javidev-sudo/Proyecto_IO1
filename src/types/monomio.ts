@@ -31,12 +31,23 @@ export class Monomio {
     }
 
     toString(): string {
+        const coeficienteDecimal = parseFloat(this.coeficiente.toFixed(4));
         if (this.variable === undefined) {
-            return this.coeficiente.toString();
+            return coeficienteDecimal.toString();
         } else if (this.isM) {
-            return `${this.coeficiente}M${this.variable}`;
+            if (coeficienteDecimal === 1) {
+                return `M${this.variable}`;
+            }
+            return `${coeficienteDecimal}M${this.variable}`;
         } else {
-            return `${this.coeficiente.toString()}${this.variable}`;
+            if (coeficienteDecimal === 1) {
+                return `${this.variable}`;
+            }
+            if(coeficienteDecimal === 0)
+            {
+                return '';
+            }
+            return `${coeficienteDecimal}${this.variable}`;
         }
     }
 }

@@ -125,15 +125,27 @@ export class Polinomio {
     public toString(): string {
         // TODO mejorar este metodo
         let resultado = '';
+        let sinVar = false;
         this.monomios.forEach((monomio, index) => {
-            if (monomio.coeficiente == 0 && monomio.getVariable()) {
+            if (monomio.coeficiente == 0 && monomio.getVariable()) { // Si el coeficiente es 0 y la variable no es undefined
+                sinVar = true
                 return;
             }
-            if (index > 0 && monomio.coeficiente > 0) {
+            if (index > 0 && monomio.coeficiente > 0 && !sinVar) {
+
                 resultado += '+';
+            }
+            if(!sinVar && monomio.coeficiente == 0)
+            {
+                return;
             }
             resultado += monomio.toString();
         });
+
+        if(resultado == '')
+        {
+           resultado = '0';
+        }
         return resultado;
     }
 }
