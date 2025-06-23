@@ -4,7 +4,7 @@ import { Monomio } from "./monomio";
 import type { TablasIteracion } from "./tablasIteracion";
 import type { Iteracion } from "./iteracion";
 export class MetodoGranM {
-  protected funcionPenalizada: Polinomio = new Polinomio('W', 1);
+  protected funcionPenalizada: Polinomio = new Polinomio('W', 1); // -W + X1 +X2 = -X1 -X2 + 0E ....
   protected funcionesObjetivos: Map<string, Polinomio> = new Map();
   protected tablasIteracion: TablasIteracion;
   // {
@@ -266,6 +266,11 @@ export class MetodoGranM {
     }
     return variablesDeEntrada;
   }
+
+
+
+
+
   resolver(): void {
     const resultadoMatrizZ: Polinomio[] = this.generarResultadoDeMatrizRegionZ();
     const variablesDisponibles: string[] = this.funcionPenalizada.obtenerVariablesDisponibles();
@@ -333,15 +338,15 @@ export class MetodoGranM {
 
   private obtenerMatrizInicial(variablesDisponibles: string[]): number[][] {
     const matrizInicial: number[][] = [];
-    this.funcionesObjetivos.forEach(function (polinomio: Polinomio) {
-      const mapaVariables: Map<string, number> = new Map();
+    this.funcionesObjetivos.forEach(function (polinomio: Polinomio) { // se recorren los polinomios
+      const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
 
-      variablesDisponibles.forEach((variable: string) => {
+      variablesDisponibles.forEach((variable: string) => { // hago un recorrido de las variables disponibles
         mapaVariables.set(variable, 0);
       });
 
-      for (const monomio of polinomio.monomios) {
-        mapaVariables.set(monomio.getVariable()!, monomio.getCoeficiente());
+      for (const monomio of polinomio.monomios) { // barremos los polinomios de las funciones objetivos
+        mapaVariables.set(monomio.getVariable()!, monomio.getCoeficiente()); // aqui metemos su variable como llave y su coeficiente
       }
 
       mapaVariables.set(polinomio.principalMonomios[0].getVariable()!, polinomio.principalMonomios[0].getCoeficiente());

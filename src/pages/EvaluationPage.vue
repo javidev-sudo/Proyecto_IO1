@@ -4,6 +4,7 @@ import type { Operacion, Restriccion } from "../types/operacion";
 import { MetodoGranM } from "../types/metodoGranM";
 import type { TablasIteracion } from "../types/tablasIteracion";
 import { ref } from "vue";
+import { MetodoDosFases } from "../types/MetodoDosFases/metododosfases";
 const query = useRoute().query;
 const maxVariables = query.maxVariables as unknown as number;
 const maxRestricciones = query.maxRestricciones as unknown as number;
@@ -45,7 +46,12 @@ function resolver() {
   }
 }
 
-function resolverDosFases() {}
+function resolverDosFases() {
+
+  const metodoDosFases = new MetodoDosFases(operacion, objetivo.value);
+  metodoDosFases.segundaFase();
+
+}
 
 function resolverGranM() {
   const metodoGranM = new MetodoGranM(operacion, objetivo.value);

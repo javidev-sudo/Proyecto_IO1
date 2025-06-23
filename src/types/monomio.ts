@@ -26,8 +26,29 @@ export class Monomio {
         }
     }
 
+
+
     public clonar(): Monomio {
     return new Monomio(this.coeficiente, this.variable, this.isM);
+    }
+
+
+
+
+
+
+    existeVariable(variable: string): boolean {
+        const regex: RegExp = new RegExp(`^${variable}\\d+$`);
+        if(this.getVariable === undefined)
+        {
+            return false;
+        }
+        if(this.getVariable() == variable || regex.test(this.getVariable()!))
+        {
+            return true;
+        }
+        return false;
+        
     }
 
     toString(): string {

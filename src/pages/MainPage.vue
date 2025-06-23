@@ -26,11 +26,11 @@ const generarModelo = (event: Event) => {
       <form class="w-full">
         <div class="flex flex-col justify-center p-5">
           <h2>Numero de variables</h2>
-          <input v-model="maxVariables" type="number" max="20" class="h-8 border border-gray-500"
-            placeholder="max (20)">
+          <input v-model="maxVariables" type="number" max="10" class="h-8 border border-gray-500"
+            placeholder="max (10)">
           <h2>Numero de restricciones</h2>
-          <input v-model="maxRestricciones" type="number" max="50" class="h-8 border border-gray-500"
-            placeholder="max (50)">
+          <input v-model="maxRestricciones" type="number" max="10" class="h-8 border border-gray-500"
+            placeholder="max (10)">
           <h2>Metodo</h2>
           <select
             v-model="metodo"
