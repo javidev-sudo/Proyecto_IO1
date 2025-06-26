@@ -120,7 +120,35 @@ export class Polinomio {
     
     
   
-
+public toStringPrincipal(voltear: boolean = false): string {
+        let resultadoP = '';
+        this.principalMonomios.forEach((monomio, index) => {
+            if (index > 0 && monomio.coeficiente > 0) {
+                resultadoP += '+';
+            }
+            resultadoP += monomio.toString();
+        });
+        if (resultadoP == '') {
+            resultadoP = '0';
+        }
+        let resultadoM = '';
+        this.monomios.forEach((monomio, index) => {
+            if (monomio.coeficiente == 0 && monomio.getVariable())
+                return;
+            if (index > 0 && monomio.coeficiente > 0) {
+                resultadoM += '+';
+            }
+            resultadoM += monomio.toString();
+        }
+        );
+        if (resultadoM == '') {
+            resultadoM = '0';
+        }
+        if (voltear) {
+            return resultadoM + ' = ' + resultadoP;
+        }
+        return resultadoP + ' = ' + resultadoM;
+    }
 
     public toString(): string {
         // TODO mejorar este metodo

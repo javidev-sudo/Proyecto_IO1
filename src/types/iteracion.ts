@@ -6,4 +6,7 @@ export type Iteracion = {
     columnaPivote: number;
     matriz: (number|Polinomio)[][];
     variablesEntrada: String[];
+    variablesColumna?: String[];
+    funcionPenalizada?: Polinomio;
+    functionObjetivos?: Polinomio[];
 };

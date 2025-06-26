@@ -23,6 +23,14 @@ export class MetodoGranM {
     this.procesarDatosIniciales();
   }
 
+  public getFunctionPenalizada(): Polinomio {
+    return this.funcionPenalizada;
+  }
+
+  public getFuncionesObjetivos(): Polinomio[] {
+    return Array.from(this.funcionesObjetivos.values());
+  }
+
   private procesarDatosIniciales() {
     this.operacion.variables.forEach((variable, index) => {
       this.funcionPenalizada.agregarMonomio(

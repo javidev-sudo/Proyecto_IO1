@@ -1,8 +1,11 @@
 import { Polinomio } from "../polinomio";
 import { Monomio } from "../monomio";
 import type { Operacion, Restriccion } from "../operacion";
+import type { TablasIteracion } from "../../types/tablasIteracion";
+import type { Iteracion } from "../../types/iteracion";
 
 export class MetodoDosFases {
+  protected tablasIteracion: TablasIteracion;
   protected funcionPenalizada: Polinomio = new Polinomio('z', 1); // -W + X1 +X2 = -X1 -X2 + 0E ....
   protected funcionesObjetivos: Map<string, Polinomio> = new Map();
   protected variablesdeEntrada: string[] = [];
@@ -18,6 +21,10 @@ export class MetodoDosFases {
   ) 
 
   {
+    this.tablasIteracion = {
+      iteraciones: [],
+      variablesFila: []
+    }
     this.procesarDatosIniciales();
   }
 
@@ -271,6 +278,8 @@ for(let fila = 0; fila < filasO.length; fila++) // aqui operamos las columnas qu
      }
 }
 
+let pivoteFinalFila: number | undefined = undefined;
+let pivoteFinalColumna: number | undefined = undefined;
 
 while(this.existePositivo(matrizInicial))
 {  
@@ -290,10 +299,23 @@ while(this.existePositivo(matrizInicial))
      {
           this.operacionesfilasConPivote(matrizInicial, pivoteFila, pivoteColumna!, fila);
      }
+      pivoteFinalFila = pivoteFila;
+      pivoteFinalColumna = pivoteColumna;
      
 }
 this.variablesdeEntrada = variablesEncontradas;
 
+const iteracion: Iteracion = {
+  matriz: [...JSON.parse(JSON.stringify(matrizInicial))],
+  filaPivote: pivoteFinalFila ?? 0,
+  columnaPivote: pivoteFinalColumna ?? 0,
+  numeroIteracion: 1,
+  variablesEntrada: ['r',...this.variablesdeEntrada],
+  variablesColumna: [...variablesDisponibles, 'RHS'],
+  funcionPenalizada: funcionPenalizadaFase1.clonar(),
+  functionObjetivos: [...this.funcionesObjetivos.values()].map((polinomio: Polinomio) => polinomio.clonar())
+}
+this.tablasIteracion.iteraciones.push(iteracion);
 
 return matrizInicial;
 
@@ -372,7 +394,7 @@ segundaFase():void
     {
         const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
         variablesDisponibles[0] = "z";
-        variablesDisponibles.push('');
+        variablesDisponibles.push('RHS');
         const columnasEliminar: number[] = [];
         const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
     
@@ -418,62 +440,48 @@ segundaFase():void
 
      this.limpiarLaColumnaVariablesEntrada(matrizFase2, this.variablesdeEntrada, variablesDisponiblesSinArtificiales); // todas las variables de entrada tienen que tener una solucion factible inicial la cual aqui logramos ese cometido
      // una vez limpiada la matriz se hace metodo simplex, aqui dependemos de si es maximzar o minimizar para que nos de la solucion correcta
-     if(this.objetivo == "max")
-     {
-        while(this.existeNegativo(matrizFase2))
+    let pivoteFinalColumna: number | undefined = undefined;
+    let pivoteFinalFila: number | undefined = undefined;
+    while(this.objetivo == "max" && this.existeNegativo(matrizFase2) || this.objetivo != "max" && this.existePositivo(matrizFase2))
+    {
+        const pivoteColumna = this.objetivo == "max" ? this.encontrarPivoteColumnaMasNegativo(matrizFase2) : this.encontrarColumnaPivoteFase1(matrizFase2);
+        const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna!);
+        if(pivoteFila === undefined)
         {
-            const pivoteColumna = this.encontrarPivoteColumnaMasNegativo(matrizFase2);
-            if(pivoteColumna === undefined)
-            {
-              break;
-            }
-            const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna);
-            if(pivoteFila === undefined)
-            {
-              break;
-            }
-            this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna)
-            const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
-            for(const fila of filas)
-            {
-              this.operacionesfilasConPivote(matrizFase2, pivoteFila, pivoteColumna!, fila);
-            }
+          break;
         }
-     }
-     else
-     {
-        while(this.existePositivo(matrizFase2))
+        this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna!)
+        const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
+        for(const fila of filas)
         {
-            const pivoteColumna = this.encontrarColumnaPivoteFase1(matrizFase2);
-            if(pivoteColumna === undefined)
-            {
-              break;
-            }
-            const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna);
-            if(pivoteFila === undefined)
-            {
-              break;
-            }
-            this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna);
-            const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
-            for(const fila of filas)
-            {
-              this.operacionesfilasConPivote(matrizFase2, pivoteFila, pivoteColumna!, fila);
-            }
+          this.operacionesfilasConPivote(matrizFase2, pivoteFila, pivoteColumna!, fila);
         }
-     }
+        pivoteFinalFila = pivoteFila;
+        pivoteFinalColumna = pivoteColumna;
+        
+    }
 
-    console.log(matrizFase2);
-    console.log(this.variablesdeEntrada);
+    const iteracion: Iteracion = {
+      matriz: [...JSON.parse(JSON.stringify(matrizFase2))],
+      filaPivote: pivoteFinalFila ?? 0,
+      columnaPivote: pivoteFinalColumna ?? 0,
+      numeroIteracion: 2,
+      variablesEntrada: [],
+      variablesColumna: [...variablesDisponiblesSinArtificiales],
+      funcionPenalizada: this.funcionPenalizada.clonar(),
+    }
+    this.tablasIteracion.iteraciones.push(iteracion);
     }
     else
     {
-        console.log('no hay solucion optima');
+        this.tablasIteracion.mensaje = 'No hay solucion optima'
     }
     
 }
 
-
+  obtenerTabladeIteraciones(): TablasIteracion {
+    return this.tablasIteracion;
+  }
 
 };
 
