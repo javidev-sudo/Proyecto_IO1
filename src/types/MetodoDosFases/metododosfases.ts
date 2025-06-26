@@ -336,11 +336,8 @@ limpiarLaColumnaVariablesEntrada(matriz: number[][], variablesEntrada: string[],
 
   for(let i = 0; i < columnasALimpiarSinRepetidos.length; i++)
   {
-     const pivote = this.encuentraPivote(matriz, columnasALimpiarSinRepetidos[i]);
-    for(let j = 0; j < filasALimpiar.length; j++)
-    {
-      this.operacionesfilasConPivote(matriz, pivote, columnasALimpiarSinRepetidos[i], filasALimpiar[j]);
-    }
+     //const pivote = this.encuentraPivote(matriz, columnasALimpiarSinRepetidos[i]);  
+      this.operacionesfilasConPivote(matriz, i+1 , columnasALimpiarSinRepetidos[i], filasALimpiar[i]);
   }
 }
 
@@ -369,21 +366,25 @@ existeNegativo(matriz: number[][]): boolean
 segundaFase():void
 {
     const matrizFase2 = this.primeraFase();
-    const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
-    variablesDisponibles[0] = "z";
-    variablesDisponibles.push('');
-    const columnasEliminar: number[] = [];
-    const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
+    console.log(matrizFase2);
+    console.log(this.variablesdeEntrada);
+    if(matrizFase2[0][matrizFase2[0].length-1] == 0)
+    {
+        const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
+        variablesDisponibles[0] = "z";
+        variablesDisponibles.push('');
+        const columnasEliminar: number[] = [];
+        const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
     
 
-    // aqui vamos a obtener las posiciones de las variables artificiales
-    for(let i = 0; i < variablesDisponibles.length; i++)
-    {
-        if(this.esVariableArtificial(variablesDisponibles[i]))
-        {
+       // aqui vamos a obtener las posiciones de las variables artificiales
+       for(let i = 0; i < variablesDisponibles.length; i++)
+      {
+           if(this.esVariableArtificial(variablesDisponibles[i]))
+           {
             columnasEliminar.push(i);
-        } 
-    }
+           } 
+      }
     columnasEliminar.sort((a, b) => b - a);
 
     const variablesDisponiblesSinArtificiales = variablesDisponibles.filter(variable => !/^a\d+$/.test(variable)); // aqui vamos a eliminar las a1, a2...
@@ -397,7 +398,6 @@ segundaFase():void
         }
     } 
 
-    console.log(matrizFase2);
     // en esta parte va,os a meter de primera funcion penalizada a nuestra matriz
     variablesDisponiblesSinArtificiales.forEach((variable : string) => { // hago un recorrido de las variables disponibles
           mapaVariables.set(variable, 0);
@@ -428,6 +428,10 @@ segundaFase():void
               break;
             }
             const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna);
+            if(pivoteFila === undefined)
+            {
+              break;
+            }
             this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna)
             const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
             for(const fila of filas)
@@ -446,6 +450,10 @@ segundaFase():void
               break;
             }
             const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna);
+            if(pivoteFila === undefined)
+            {
+              break;
+            }
             this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna);
             const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
             for(const fila of filas)
@@ -456,8 +464,13 @@ segundaFase():void
      }
 
     console.log(matrizFase2);
-    console.log(variablesDisponiblesSinArtificiales);
     console.log(this.variablesdeEntrada);
+    }
+    else
+    {
+        console.log('no hay solucion optima');
+    }
+    
 }
 
 
