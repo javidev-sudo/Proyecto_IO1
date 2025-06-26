@@ -123,7 +123,7 @@ function resolverGranM() {
     </select>
     <div v-if="existeTodosMenoresIguales" class="text-red-500"> Son todos menores o iguales, no puede ser resuelto por granM o dos fases</div>
     <div class="flex flex-row items-center justify-center">
-      <button
+      <button :disabled="existeTodosMenoresIguales"
         @click="resolver"
         class="cursor-pointer m-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded"
       >
