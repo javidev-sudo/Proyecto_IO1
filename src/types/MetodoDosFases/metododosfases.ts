@@ -451,7 +451,7 @@ segundaFase():void
         this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna!)
         let elementoentrada = variablesDisponibles[pivoteColumna!];
         variablesEntrada[pivoteFila] = elementoentrada;
-        const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
+        const filas = this.filasAOperar(matrizFase2, pivoteColumna!, pivoteFila);
         for(const fila of filas)
         {
           this.operacionesfilasConPivote(matrizFase2, pivoteFila, pivoteColumna!, fila);
