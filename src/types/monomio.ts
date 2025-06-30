@@ -52,7 +52,7 @@ export class Monomio {
     }
 
     toString(): string {
-        const coeficienteDecimal = parseFloat(this.coeficiente.toFixed(4));
+        const coeficienteDecimal = parseFloat(this.coeficiente.toFixed(2));
         if (this.variable === undefined) {
             return coeficienteDecimal.toString();
         } else if (this.isM) {

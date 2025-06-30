@@ -74,7 +74,7 @@ function resolverGranM() {
   >
     <h2>Funcion Objetivo</h2>
     <div class="flex flex-row">
-      <div class="flex flex-row p-2" v-for="(x, index) in operacion.variables" v-bind:key="x">
+      <div class="flex flex-row p-2" v-for="(x, index) in operacion.variables">
         <h2 class="pr-1 text-xl" v-if="index != 0">+</h2>
         <input
           v-model="operacion.variables[index]"
@@ -191,7 +191,7 @@ function resolverGranM() {
                 </thead>
                 <tbody>
                   <tr></tr>
-                  <tr>
+                  <tr v-if="metodo == 'gm'">
                     <td
                       class="text-white bg-blue-400 px-2 py-5 text-center"
                     >

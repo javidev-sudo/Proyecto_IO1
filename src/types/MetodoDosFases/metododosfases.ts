@@ -166,7 +166,7 @@ encuentraPivote(matriz: number[][],columnaPivote: number): number{
       const denominador = matriz[i][columnaPivote];
       if(denominador !== 0)
       {
-        division.set(i, numerador / denominador);
+        division.set(i, parseFloat((numerador / denominador).toFixed(2)));
       }      
     }   
 
@@ -212,10 +212,9 @@ operacionesfilasConPivote(matriz: number[][], pivote: number, columnaPivote: num
   }
 
 
-  filasAOperar(matriz: number[][], columna: number) : number[]
+  filasAOperar(matriz: number[][], columna: number, pivote: number) : number[]
   {
     const filas: number[] = [];
-    const pivote = this.encuentraPivote(matriz, columna);
     
     for (let i = 0; i < matriz.length; i++) 
     {
@@ -247,7 +246,7 @@ primeraFase(): number[][]
 {
 const funcionPenalizadaFase1 = new Polinomio('r', 1); // r = a1 + a2
 
-const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
+const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles(); // obtenemos las variables disponibles
 const filasO : number[] = [];
 let variablesEncontradas = this.obtenerVariablesDeEntrada();// son las variables de entrada
 
@@ -278,10 +277,10 @@ for(let fila = 0; fila < filasO.length; fila++) // aqui operamos las columnas qu
      }
 }
 
-let pivoteFinalFila: number | undefined = undefined;
-let pivoteFinalColumna: number | undefined = undefined;
+let pivoteFinalFila: number | undefined = undefined; //vista
+let pivoteFinalColumna: number | undefined = undefined; //vista
 
-while(this.existePositivo(matrizInicial))
+while(Math.trunc(matrizInicial[0][matrizInicial[0].length-1]) !== 0)
 {  
      const pivoteColumna = this.encontrarColumnaPivoteFase1(matrizInicial);
      const pivoteFila = this.encuentraPivote(matrizInicial, pivoteColumna!);
@@ -293,19 +292,19 @@ while(this.existePositivo(matrizInicial))
      variablesEncontradas[pivoteFila-1] = variable;
      this.dividirConElementoPivote(matrizInicial, pivoteFila, pivoteColumna!);
 
-     const filas = this.filasAOperar(matrizInicial, pivoteColumna!);
+     const filas = this.filasAOperar(matrizInicial, pivoteColumna!, pivoteFila);
 
      for(const fila of filas)
      {
           this.operacionesfilasConPivote(matrizInicial, pivoteFila, pivoteColumna!, fila);
      }
-      pivoteFinalFila = pivoteFila;
-      pivoteFinalColumna = pivoteColumna;
+      pivoteFinalFila = pivoteFila; // vista
+      pivoteFinalColumna = pivoteColumna; //vista
      
 }
 this.variablesdeEntrada = variablesEncontradas;
 
-const iteracion: Iteracion = {
+const iteracion: Iteracion = { // vista
   matriz: [...JSON.parse(JSON.stringify(matrizInicial))],
   filaPivote: pivoteFinalFila ?? 0,
   columnaPivote: pivoteFinalColumna ?? 0,
@@ -315,7 +314,7 @@ const iteracion: Iteracion = {
   funcionPenalizada: funcionPenalizadaFase1.clonar(),
   functionObjetivos: [...this.funcionesObjetivos.values()].map((polinomio: Polinomio) => polinomio.clonar())
 }
-this.tablasIteracion.iteraciones.push(iteracion);
+this.tablasIteracion.iteraciones.push(iteracion); // vista
 
 return matrizInicial;
 
@@ -388,16 +387,15 @@ existeNegativo(matriz: number[][]): boolean
 segundaFase():void
 {
     const matrizFase2 = this.primeraFase();
-    console.log(matrizFase2);
-    console.log(this.variablesdeEntrada);
-    if(matrizFase2[0][matrizFase2[0].length-1] == 0)
+    
+    if(Math.trunc(matrizFase2[0][matrizFase2[0].length-1]) == 0)
     {
         const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
         variablesDisponibles[0] = "z";
         variablesDisponibles.push('RHS');
         const columnasEliminar: number[] = [];
         const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
-    
+        let variablesEntrada: string[] = structuredClone(this.variablesdeEntrada);
 
        // aqui vamos a obtener las posiciones de las variables artificiales
        for(let i = 0; i < variablesDisponibles.length; i++)
@@ -407,7 +405,7 @@ segundaFase():void
             columnasEliminar.push(i);
            } 
       }
-    columnasEliminar.sort((a, b) => b - a);
+    columnasEliminar.sort((a, b) => b - a); // invertimos las columnas para evitar problemas
 
     const variablesDisponiblesSinArtificiales = variablesDisponibles.filter(variable => !/^a\d+$/.test(variable)); // aqui vamos a eliminar las a1, a2...
     
@@ -421,7 +419,7 @@ segundaFase():void
     } 
 
     // en esta parte va,os a meter de primera funcion penalizada a nuestra matriz
-    variablesDisponiblesSinArtificiales.forEach((variable : string) => { // hago un recorrido de las variables disponibles
+    variablesDisponiblesSinArtificiales.forEach((variable : string) => { // hago un recorrido de las variables disponibles sin artificiales
           mapaVariables.set(variable, 0);
      });
      this.funcionPenalizada.principalMonomios.forEach((monomio: Monomio) => {
@@ -442,7 +440,7 @@ segundaFase():void
      // una vez limpiada la matriz se hace metodo simplex, aqui dependemos de si es maximzar o minimizar para que nos de la solucion correcta
     let pivoteFinalColumna: number | undefined = undefined;
     let pivoteFinalFila: number | undefined = undefined;
-    while(this.objetivo == "max" && this.existeNegativo(matrizFase2) || this.objetivo != "max" && this.existePositivo(matrizFase2))
+    while(this.objetivo == "max" && this.existeNegativo(matrizFase2) || this.objetivo != "max" && this.existePositivo(matrizFase2)) // aqui usamos el metodo simplex
     {
         const pivoteColumna = this.objetivo == "max" ? this.encontrarPivoteColumnaMasNegativo(matrizFase2) : this.encontrarColumnaPivoteFase1(matrizFase2);
         const pivoteFila = this.encuentraPivote(matrizFase2,pivoteColumna!);
@@ -451,6 +449,8 @@ segundaFase():void
           break;
         }
         this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna!)
+        let elementoentrada = variablesDisponibles[pivoteColumna!];
+        variablesEntrada[pivoteFila] = elementoentrada;
         const filas = this.filasAOperar(matrizFase2, pivoteColumna!);
         for(const fila of filas)
         {
@@ -466,7 +466,7 @@ segundaFase():void
       filaPivote: pivoteFinalFila ?? 0,
       columnaPivote: pivoteFinalColumna ?? 0,
       numeroIteracion: 2,
-      variablesEntrada: [],
+      variablesEntrada: ['',...variablesEntrada],
       variablesColumna: [...variablesDisponiblesSinArtificiales],
       funcionPenalizada: this.funcionPenalizada.clonar(),
     }
@@ -476,6 +476,7 @@ segundaFase():void
     {
         this.tablasIteracion.mensaje = 'No hay solucion optima'
     }
+
     
 }
 
