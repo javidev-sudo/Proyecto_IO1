@@ -280,7 +280,7 @@ for(let fila = 0; fila < filasO.length; fila++) // aqui operamos las columnas qu
 let pivoteFinalFila: number | undefined = undefined; //vista
 let pivoteFinalColumna: number | undefined = undefined; //vista
 
-while(Math.trunc(matrizInicial[0][matrizInicial[0].length-1]) !== 0)
+while((Math.trunc((matrizInicial[0][matrizInicial[0].length - 1] )) !== 0) && (this.existePositivo(matrizInicial)))
 {  
      const pivoteColumna = this.encontrarColumnaPivoteFase1(matrizInicial);
      const pivoteFila = this.encuentraPivote(matrizInicial, pivoteColumna!);
@@ -357,8 +357,19 @@ limpiarLaColumnaVariablesEntrada(matriz: number[][], variablesEntrada: string[],
 
   for(let i = 0; i < columnasALimpiarSinRepetidos.length; i++)
   {
-     //const pivote = this.encuentraPivote(matriz, columnasALimpiarSinRepetidos[i]);  
-      this.operacionesfilasConPivote(matriz, i+1 , columnasALimpiarSinRepetidos[i], filasALimpiar[i]);
+      const pivote = this.buscar1(matriz, columnasALimpiarSinRepetidos[i]);
+      this.operacionesfilasConPivote(matriz, pivote! , columnasALimpiarSinRepetidos[i], filasALimpiar[i]);
+  }
+}
+
+buscar1(matriz: number[][], columnaPivote: number): number | undefined
+{
+  for(let i = 0; i < matriz.length; i++)
+  {
+    if(matriz[i][columnaPivote] === 1)
+    {
+      return i;
+    }
   }
 }
 
