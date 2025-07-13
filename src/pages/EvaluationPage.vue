@@ -74,7 +74,7 @@ function resolverGranM() {
   >
     <h2>Funcion Objetivo</h2>
     <div class="flex flex-row">
-      <div class="flex flex-row p-2" v-for="(x, index) in operacion.variables">
+      <div class="flex flex-row p-2" v-for="(_, index) in operacion.variables">
         <h2 class="pr-1 text-xl" v-if="index != 0">+</h2>
         <input
           v-model="operacion.variables[index]"
@@ -88,7 +88,7 @@ function resolverGranM() {
     <h2>Restricciones</h2>
     <div class="flex flex-col" v-for="restriccion in operacion.restricciones" v-bind:key="restriccion.operador">
       <div class="flex flex-row p-2">
-        <div class="flex flex-row" v-for="(y, index2) in restriccion.variables" v-bind:key="index2">
+        <div class="flex flex-row" v-for="(_, index2) in restriccion.variables" v-bind:key="index2">
           <h2 class="pr-1 text-xl" v-if="index2 != 0">+</h2>
           <input
             v-model="restriccion.variables[index2]"
