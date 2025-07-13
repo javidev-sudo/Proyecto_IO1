@@ -5,4 +5,6 @@ export type TablasIteracion = {
     variablesColumna?: string[],
     variablesFila: string[],
     mensaje?: string,
+    resultado?: number;
+    variableSalida?: Map<String, number>;
 }

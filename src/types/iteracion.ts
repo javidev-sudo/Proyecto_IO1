@@ -5,8 +5,8 @@ export type Iteracion = {
     filaPivote: number;
     columnaPivote: number;
     matriz: (number|Polinomio)[][];
-    variablesEntrada: String[];
-    variablesColumna?: String[];
+    variablesEntrada: string[];
+    variablesColumna?: string[];
     funcionPenalizada?: Polinomio;
     functionObjetivos?: Polinomio[];
 };

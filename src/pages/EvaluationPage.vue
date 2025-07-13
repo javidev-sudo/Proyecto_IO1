@@ -247,6 +247,14 @@ function resolverGranM() {
           <div v-if="tablasDeIteraciones.mensaje" class="flex flex-row max-w-full overflow-x-auto mb-10 text-center">
             <h2 class="text-2xl font-bold">{{ tablasDeIteraciones.mensaje }}</h2>
           </div>
+
+          <div v-if="tablasDeIteraciones.variableSalida" class="flex flex-col max-w-full overflow-x-auto mb-10">
+            <h3 v-for="([variable, valor]) in tablasDeIteraciones.variableSalida" class="text-2xl"><b>{{ variable }} = </b>{{ valor }}</h3>
+          </div>
+
+          <div v-if="tablasDeIteraciones.resultado" class="flex flex-row max-w-full overflow-x-auto mb-10 text-center">
+            <h2 class="text-2xl font-bold">Valor Z: {{ tablasDeIteraciones.resultado }}</h2>
+          </div>
           
         </div>
       </div>

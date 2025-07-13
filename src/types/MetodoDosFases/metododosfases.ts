@@ -395,18 +395,29 @@ existeNegativo(matriz: number[][]): boolean
   return this.encontrarPivoteColumnaMasNegativo(matriz) !== undefined;
 }
 
+existeArtificiales(variablesdeEntrada: string[]): boolean
+{
+  for(let i = 0; i < variablesdeEntrada.length; i++)
+  {
+    if(this.esVariableArtificial(variablesdeEntrada[i]))
+    {
+      return true;
+    }
+  }
+  return false;
+}
 segundaFase():void
 {
     const matrizFase2 = this.primeraFase();
-    
-    if(Math.trunc(matrizFase2[0][matrizFase2[0].length-1]) == 0)
+    let variablesEntrada: string[] = structuredClone(this.variablesdeEntrada);
+    if(Math.trunc(matrizFase2[0][matrizFase2[0].length-1]) == 0 && !this.existeArtificiales(variablesEntrada)) // si la ultima columna de la matriz es 0 y existen variables artificiales
     {
         const variablesDisponibles: string[] = this.funcionPenalizadaAux.obtenerVariablesDisponibles();
         variablesDisponibles[0] = "z";
         variablesDisponibles.push('RHS');
         const columnasEliminar: number[] = [];
         const mapaVariables: Map<string, number> = new Map(); // se crea un map como llave es un string y el valor es un number
-        let variablesEntrada: string[] = structuredClone(this.variablesdeEntrada);
+        
 
        // aqui vamos a obtener las posiciones de las variables artificiales
        for(let i = 0; i < variablesDisponibles.length; i++)
@@ -461,7 +472,7 @@ segundaFase():void
         }
         this.dividirConElementoPivote(matrizFase2,pivoteFila,pivoteColumna!)
         let elementoentrada = variablesDisponibles[pivoteColumna!];
-        variablesEntrada[pivoteFila] = elementoentrada;
+        variablesEntrada[pivoteFila - 1] = elementoentrada;
         const filas = this.filasAOperar(matrizFase2, pivoteColumna!, pivoteFila);
         for(const fila of filas)
         {
@@ -471,6 +482,8 @@ segundaFase():void
         pivoteFinalColumna = pivoteColumna;
         
     }
+
+    const valoresVariablesSalida: Map<string, number> = this.obtenerValoresDeLasVariablesSalida(matrizFase2, variablesEntrada);
 
     const iteracion: Iteracion = {
       matriz: [...JSON.parse(JSON.stringify(matrizFase2))],
@@ -482,10 +495,13 @@ segundaFase():void
       funcionPenalizada: this.funcionPenalizada.clonar(),
     }
     this.tablasIteracion.iteraciones.push(iteracion);
-    }
+    this.tablasIteracion.variableSalida = valoresVariablesSalida; // metemos los valores de las variables de salida en la tabla de iteraciones
+    this.tablasIteracion.resultado = this.valorDeZ(this.funcionPenalizada, valoresVariablesSalida); // obtenemos el valor de Z
+  
+   }
     else
     {
-        this.tablasIteracion.mensaje = 'No hay solucion optima'
+        this.tablasIteracion.mensaje = 'No hay solucion optima' + (this.existeArtificiales(variablesEntrada)? ' - Existe variables artificiales' : '');
     }
 
     
@@ -494,7 +510,43 @@ segundaFase():void
   obtenerTabladeIteraciones(): TablasIteracion {
     return this.tablasIteracion;
   }
+  
+
+  private valorDeZ(funcionPenalizada: Polinomio, valoresVariablesSalida: Map<string, number>): number {
+    let resultado: number = 0;
+    funcionPenalizada.principalMonomios.forEach((monomio: Monomio) => { // recorremos los monomios de la funcion penalizada
+      if (monomio.getVariable() && this.esVariableX(monomio.getVariable()!)) {
+        resultado += monomio.getCoeficiente() * (valoresVariablesSalida.get(monomio.getVariable()!) ?? 0);
+      }
+    });
+    return resultado*-1;
+  }
+  
+  esVariableX(variable: string): boolean {
+    let existe = false;
+    const regex: RegExp = new RegExp(`^x\\d+$`);
+    if (regex.test(variable)) {
+      existe = true;
+    }
+    return existe;
+  }
+
+
+
+  private obtenerValoresDeLasVariablesSalida(matriz: number[][], variablesEntrada: string[]): Map<string, number> {
+    const valoresVariablesSalida: Map<string, number> = new Map();
+    for(let i = 0 ; i < variablesEntrada.length; i++) // recorremos las variables de entrada
+    {
+      const valor = parseFloat((matriz[i+1][matriz[i+1].length - 1]).toFixed(3)); // obtenemos el valor de la ultima columna de cada fila
+      valoresVariablesSalida.set(variablesEntrada[i], valor); // metemos la variable de entrada y su valor en el map
+    }
+    return valoresVariablesSalida; // retornamos el map con las variables de salida y sus valores
+  }
+
 
 };
+
+
+
 
 

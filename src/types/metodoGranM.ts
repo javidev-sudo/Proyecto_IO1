@@ -278,7 +278,7 @@ export class MetodoGranM {
   }
 
   // aqui solamente nos ayuda a obtener las variables de entrada
-  obtenerVariablesDeEntrada(): String[]
+  obtenerVariablesDeEntrada(): string[]
   {
     const variablesDeEntrada: string[] = [];
     for(const  [_, polinomio] of this.funcionesObjetivos)
@@ -338,6 +338,10 @@ export class MetodoGranM {
       this.operacionFilaPolinomios(resultadoMatrizZ, matrizInicial, pivote, columnaPivote!); // aqui hacemos las operaciones con los polinomios
       numeroIteraciones++;
     }
+      const valoresVariablesSalida: Map<string, number> = this.obtenerValoresDeLasVariablesSalida(matrizInicial, variablesEncontradas); // obtenemos los valores de las variables de salida
+      console.log(this.operacion.variables);
+
+
       const iteracion: Iteracion = { // esto es solo para la vista
         numeroIteracion: numeroIteraciones,
         columnaPivote: 0,
@@ -345,8 +349,40 @@ export class MetodoGranM {
         matriz: [this.clonarPolinomios(resultadoMatrizZ),...JSON.parse(JSON.stringify(matrizInicial))],
         variablesEntrada: [...variablesEncontradas]
       }
+
       this.tablasIteracion.iteraciones.push(iteracion);
+      this.tablasIteracion.variableSalida = valoresVariablesSalida; // metemos los valores de las variables de salida en la tabla de iteraciones
+      this.tablasIteracion.resultado = this.valorDeZ(this.funcionPenalizada, valoresVariablesSalida); // obtenemos el valor de Z
+      console.log(this.tablasIteracion.resultado);
   } 
+
+  private obtenerValoresDeLasVariablesSalida(matriz: number[][], variablesEntrada: string[]): Map<string, number> {
+    const valoresVariablesSalida: Map<string, number> = new Map();
+    for(let i = 0 ; i < variablesEntrada.length; i++) // recorremos las variables de entrada
+    {
+      const valor = parseFloat((matriz[i][matriz[i].length - 1]).toFixed(3)); // obtenemos el valor de la ultima columna de cada fila
+      valoresVariablesSalida.set(variablesEntrada[i], valor); // metemos la variable de entrada y su valor en el map
+    }
+    return valoresVariablesSalida; // retornamos el map con las variables de salida y sus valores
+  }
+
+  private valorDeZ(funcionPenalizada: Polinomio, valoresVariablesSalida: Map<string, number>): number {
+    let resultado: number = 0;
+    funcionPenalizada.principalMonomios.forEach((monomio: Monomio) => { // recorremos los monomios de la funcion penalizada
+      if (monomio.getVariable() && this.esVariableX(monomio.getVariable()!)) {
+        resultado += monomio.getCoeficiente() * (valoresVariablesSalida.get(monomio.getVariable()!) ?? 0);
+      }
+    });
+    return this.objetivo == 'max' ? resultado * -1 : resultado;
+  }
+  esVariableX(variable: string): boolean {
+    let existe = false;
+    const regex: RegExp = new RegExp(`^x\\d+$`);
+    if (regex.test(variable)) {
+      existe = true;
+    }
+    return existe;
+  }
 
   private obtenerMatrizInicial(variablesDisponibles: string[]): number[][] {
     const matrizInicial: number[][] = [];
